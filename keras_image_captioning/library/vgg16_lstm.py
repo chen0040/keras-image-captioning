@@ -1,6 +1,5 @@
 from keras.layers import Embedding, TimeDistributed, RepeatVector, LSTM, concatenate, Input, Reshape, Dense
 from keras.preprocessing.image import array_to_img, img_to_array, load_img
-from keras.preprocessing.sequence import pad_sequences
 import numpy as np
 from keras.applications.vgg16 import VGG16, preprocess_input
 from keras.models import Model
