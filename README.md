@@ -10,7 +10,7 @@ algorithms based on VGG16 (top included) and LSTM encoder and decoder, with one-
 captioning algorithms based on VGG16 (top included/excluded configurable) and LSTM encoder and decoder, with word 
 embedding for the text description
 
-So far Vgg16LstmImgCap in [library/vgg16_lstm.py] gives the best performance
+So far with vgg16_top_included=True gives the best performance
 
 # Usage
 

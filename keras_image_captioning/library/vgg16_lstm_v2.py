@@ -19,7 +19,7 @@ class Vgg16LstmImgCapV2(object):
         self.vocab_size = None
         self.word2idx = None
         self.idx2word = None
-        self.vgg16_top_included = False
+        self.vgg16_top_included = True
 
     def load_model(self, model_dir_path):
         config_file_path = Vgg16LstmImgCapV2.get_config_file_path(model_dir_path)
@@ -47,17 +47,18 @@ class Vgg16LstmImgCapV2(object):
         return os.path.join(model_dir_path, Vgg16LstmImgCapV2.model_name + '-weights.h5')
 
     def create_model(self):
-        vgg16_input = Input(shape=(25088 if not self.vgg16_top_included else 100, ))
+        vgg16_input = Input(shape=(25088 if not self.vgg16_top_included else 1000, ))
         vgg16_feature_dense = Dense(units=128)(vgg16_input)
         vgg16_feature_repeat = RepeatVector(self.max_seq_length)(vgg16_feature_dense)
 
         language_input = Input(shape=(self.max_seq_length, ))
         language_input_embed = Embedding(
-            output_dim=100,
+            output_dim=200,
             input_dim=self.vocab_size,
             input_length=self.max_seq_length)(language_input)
         language_model = LSTM(units=128, return_sequences=True)(language_input_embed)
-        # language_model = TimeDistributed(Dense(128, activation='relu'))(language_model)
+        language_model = LSTM(units=128, return_sequences=True)(language_model)
+        language_model = TimeDistributed(Dense(128, activation='relu'))(language_model)
 
         decoder = concatenate([vgg16_feature_repeat, language_model])
 
