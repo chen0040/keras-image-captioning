@@ -1,27 +1,29 @@
 from keras_image_captioning.library.img_cap_loader import load_img_cap
-from keras_image_captioning.library.text_fit import fit_text
 from keras_image_captioning.library.vgg16_lstm_v2 import Vgg16LstmImgCapV2
 import numpy as np
-from sklearn.model_selection import train_test_split
+from random import shuffle
 
 
 def main():
     seed = 42
-    max_vocab_size = 5000
 
     np.random.seed(seed)
+
     img_dir_path = './data/pokemon/img'
     txt_dir_path = './data/pokemon/txt'
     model_dir_path = './models/pokemon'
     data = load_img_cap(img_dir_path, txt_dir_path)
 
-    train_data, test_data = train_test_split(data, test_size=0.2, random_state=seed)
-
-    config = fit_text(data, max_vocab_size=max_vocab_size, max_allowed_seq_length=20)
+    shuffle(data)
 
     img_cap = Vgg16LstmImgCapV2()
-    epochs = 100
-    img_cap.fit(config, train_data, test_data, model_dir_path=model_dir_path, epochs=epochs, vgg16_top_included=True)
+    img_cap.load_model(model_dir_path)
+
+    for img_path, actual_caption in data[:20]:
+        predicted_caption = img_cap.predict_image_caption(img_path)
+        actual_caption = actual_caption.lower()
+        print('Origin: ', actual_caption)
+        print('Predict: ', predicted_caption, '...')
 
 
 if __name__ == '__main__':

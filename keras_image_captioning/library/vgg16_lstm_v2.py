@@ -32,7 +32,7 @@ class Vgg16LstmImgCapV2(object):
         self.vgg16_top_included = self.config['vgg16_top_included']
         self.model = self.create_model()
         self.model.load_weights(weight_file_path)
-        self.vgg16_model = VGG16(weights='imagenet', include_top=False)
+        self.vgg16_model = VGG16(weights='imagenet', include_top=self.vgg16_top_included)
 
     @staticmethod
     def get_config_file_path(model_dir_path):
@@ -47,22 +47,21 @@ class Vgg16LstmImgCapV2(object):
         return os.path.join(model_dir_path, Vgg16LstmImgCapV2.model_name + '-weights.h5')
 
     def create_model(self):
-        vgg16_input = Input(shape=(25088 if self.vgg16_top_included else 100, ))
+        vgg16_input = Input(shape=(25088 if not self.vgg16_top_included else 100, ))
         vgg16_feature_dense = Dense(units=128)(vgg16_input)
         vgg16_feature_repeat = RepeatVector(self.max_seq_length)(vgg16_feature_dense)
 
         language_input = Input(shape=(self.max_seq_length, ))
         language_input_embed = Embedding(
-            output_dim=200,
+            output_dim=100,
             input_dim=self.vocab_size,
             input_length=self.max_seq_length)(language_input)
-        language_model = LSTM(units=256, return_sequences=True)(language_input_embed)
-        language_model = LSTM(units=256, return_sequences=True)(language_model)
-        language_model = TimeDistributed(Dense(128, activation='relu'))(language_model)
+        language_model = LSTM(units=128, return_sequences=True)(language_input_embed)
+        # language_model = TimeDistributed(Dense(128, activation='relu'))(language_model)
 
         decoder = concatenate([vgg16_feature_repeat, language_model])
 
-        decoder = LSTM(units=512, return_sequences=False)(decoder)
+        decoder = LSTM(units=128, return_sequences=False)(decoder)
         decoder_dense = Dense(units=self.vocab_size, activation='softmax')(decoder)
 
         model = Model([vgg16_input, language_input], decoder_dense)
@@ -141,7 +140,7 @@ class Vgg16LstmImgCapV2(object):
         self.word2idx = self.config['word2idx']
         self.idx2word = self.config['idx2word']
         self.config['vgg16_top_included'] = self.vgg16_top_included
-        self.vgg16_model = VGG16(weights='imagenet', include_top=False)
+        self.vgg16_model = VGG16(weights='imagenet', include_top=self.vgg16_top_included)
 
         print('vocab_size: ', self.vocab_size)
         print('max_seq_length: ', self.max_seq_length)
@@ -174,7 +173,7 @@ class Vgg16LstmImgCapV2(object):
     def predict_image_caption(self, img_path):
         img = img_to_array(load_img(img_path, target_size=(224, 224)))
         img = np.expand_dims(img, axis=0)
-        img_feature = self.vgg16_model.predict(img)
+        img_feature = self.vgg16_model.predict(img).ravel()
         input_seq = np.zeros(shape=self.max_seq_length)
         input_seq[self.max_seq_length-1] = self.word2idx['START']
         input_seq = np.expand_dims(input_seq, axis=0)

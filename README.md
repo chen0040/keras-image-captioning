@@ -6,9 +6,11 @@ The implementation of the image captioning algorithms can be found in the [libra
 
 * Vgg16LstmImgCap in [library/vgg16_lstm.py](keras_image_captioning/library/vgg16_lstm.py) implements an image captioning
 algorithms based on VGG16 (top included) and LSTM encoder and decoder, with one-hot encoding for the text description
-* Vgg16LstmImgCap in [library/vgg16_lstm_v2.py](keras_image_captioning/library/vgg16_lstm_v2.py) implements an image 
-captioning algorithms based on VGG16 (top not included) and LSTM encoder and decoder, with word embedding for the text 
-description
+* Vgg16LstmImgCapV2 in [library/vgg16_lstm_v2.py](keras_image_captioning/library/vgg16_lstm_v2.py) implements an image 
+captioning algorithms based on VGG16 (top included/excluded configurable) and LSTM encoder and decoder, with word 
+embedding for the text description
+
+So far Vgg16LstmImgCap in [library/vgg16_lstm.py] gives the best performance
 
 # Usage
 
