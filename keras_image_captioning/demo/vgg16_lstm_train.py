@@ -20,7 +20,8 @@ def main():
     config = fit_text(data, max_vocab_size=max_vocab_size, max_allowed_seq_length=20)
 
     img_cap = Vgg16LstmImgCap()
-    img_cap.fit(config, train_data, test_data, model_dir_path=model_dir_path)
+    epochs = 30
+    img_cap.fit(config, train_data, test_data, model_dir_path=model_dir_path, epochs=epochs)
 
 
 if __name__ == '__main__':
