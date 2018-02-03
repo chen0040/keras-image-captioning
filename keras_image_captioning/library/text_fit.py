@@ -12,7 +12,7 @@ def fit_text(data, max_vocab_size, max_allowed_seq_length=None):
         seq_length = len(words)
         if max_allowed_seq_length is not None and seq_length > max_allowed_seq_length:
             seq_length = max_allowed_seq_length
-            words = words[:seq_length]
+            words = words[:seq_length-1] + ['END']
         max_seq_length = max(seq_length, max_seq_length)
 
         for w in words:

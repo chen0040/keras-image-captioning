@@ -76,13 +76,22 @@ class Vgg16LstmImgCap(object):
     def transform_encoding(self, data):
         txt_inputs = []
         targets = []
-        images = []
+        img_features = []
 
         for t in data:
             img_path, txt = t
+            print(txt)
             img = img_to_array(load_img(img_path, target_size=(224, 224)))
+            img = np.expand_dims(img, axis=0)
+            img_feature = self.vgg16_model.predict(img)[0]
             txt = 'START ' + txt.lower() + ' END'
+
             words = nltk.word_tokenize(txt)
+
+            if len(words) > self.max_seq_length:
+                words = words[:self.max_seq_length - 1] + ['END']
+
+            print(words)
 
             for i in range(1, len(words)):
                 input_seq = np.zeros(shape=(self.max_seq_length, self.vocab_size))
@@ -98,12 +107,11 @@ class Vgg16LstmImgCap(object):
 
                 txt_inputs.append(input_seq)
                 targets.append(output_seq)
-                images.append(img)
-        images = np.array(images, dtype=float)
-        images = preprocess_input(images)
-        img_features = self.vgg16_model.predict(images)
+                img_features.append(img_feature)
 
-        return img_features, np.array(txt_inputs), np.array(targets)
+        print('done')
+
+        return np.array(img_features), np.array(txt_inputs), np.array(targets)
 
     def fit(self, config, train_data, test_data, model_dir_path, batch_size=None, epochs=None):
         if batch_size is None:
