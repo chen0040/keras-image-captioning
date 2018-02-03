@@ -9,6 +9,7 @@ def fit_text(data, max_vocab_size, max_allowed_seq_length=None):
         _, txt = t
         txt = 'START ' + txt.lower() + ' END'
         words = nltk.word_tokenize(txt)
+        words = [word for word in words if word.isalnum()]
         seq_length = len(words)
         if max_allowed_seq_length is not None and seq_length > max_allowed_seq_length:
             seq_length = max_allowed_seq_length

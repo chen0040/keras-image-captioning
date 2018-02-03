@@ -46,15 +46,15 @@ class Vgg16LstmImgCap(object):
 
     def create_model(self):
         vgg16_input = Input(shape=(1000, ))
-        vgg16_feature_dense = Dense(units=5)(vgg16_input)
+        vgg16_feature_dense = Dense(units=128)(vgg16_input)
         vgg16_feature_repeat = RepeatVector(self.max_seq_length)(vgg16_feature_dense)
 
         language_input = Input(shape=(self.max_seq_length, self.vocab_size))
-        language_model = LSTM(units=5, return_sequences=True)(language_input)
+        language_model = LSTM(units=128, return_sequences=True)(language_input)
 
         decoder = concatenate([vgg16_feature_repeat, language_model])
 
-        decoder = LSTM(units=5, return_sequences=False)(decoder)
+        decoder = LSTM(units=128, return_sequences=False)(decoder)
         decoder_dense = Dense(units=self.vocab_size, activation='softmax')(decoder)
 
         model = Model([vgg16_input, language_input], decoder_dense)
@@ -87,6 +87,7 @@ class Vgg16LstmImgCap(object):
             txt = 'START ' + txt.lower() + ' END'
 
             words = nltk.word_tokenize(txt)
+            words = [word for word in words if word.isalnum()]
 
             if len(words) > self.max_seq_length:
                 words = words[:self.max_seq_length - 1] + ['END']
@@ -164,15 +165,24 @@ class Vgg16LstmImgCap(object):
         img_feature = self.vgg16_model.predict(img)
         input_seq = np.zeros(shape=(self.max_seq_length, self.vocab_size))
         input_seq[self.max_seq_length-1, self.word2idx['START']] = 1
-        np.expand_dims(input_seq, axis=0)
+        input_seq = np.expand_dims(input_seq, axis=0)
         wid_list = ['START']
         while wid_list[len(wid_list)-1] != 'END':
             output_tokens = self.model.predict([img_feature, input_seq])
-            output_idx = np.argmax(output_tokens[0, -1, :])
+            output_idx = np.argmax(output_tokens[0, :])
             output_word = self.idx2word[output_idx]
             wid_list.append(output_word)
 
-        return wid_list
+            if len(wid_list) > self.max_seq_length:
+                break
+
+            input_seq = np.zeros(shape=(self.max_seq_length, self.vocab_size))
+            for j in range(0, len(wid_list)):
+                k = self.max_seq_length - len(wid_list) + j
+                input_seq[k, self.word2idx[wid_list[j]]] = 1
+            input_seq = np.expand_dims(input_seq, axis=0)
+
+        return ' '.join(wid_list).replace('START', '').replace('END', '').strip()
 
 
 def main():
