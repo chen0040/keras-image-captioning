@@ -2,7 +2,7 @@ from collections import Counter
 import nltk
 
 
-def fit_text(data, max_vocab_size):
+def fit_text(data, max_vocab_size, max_allowed_seq_length=None):
     counter = Counter()
     max_seq_length = 0
     for t in data:
@@ -10,7 +10,11 @@ def fit_text(data, max_vocab_size):
         txt = 'START ' + txt.lower() + ' END'
         words = nltk.word_tokenize(txt)
         seq_length = len(words)
+        if max_allowed_seq_length is not None and seq_length > max_allowed_seq_length:
+            seq_length = max_allowed_seq_length
+            words = words[:seq_length]
         max_seq_length = max(seq_length, max_seq_length)
+
         for w in words:
             counter[w] += 1
 

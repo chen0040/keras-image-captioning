@@ -17,7 +17,7 @@ def main():
 
     train_data, test_data = train_test_split(data, test_size=0.2, random_state=seed)
 
-    config = fit_text(data, max_vocab_size=max_vocab_size)
+    config = fit_text(data, max_vocab_size=max_vocab_size, max_allowed_seq_length=10)
 
     img_cap = Vgg16LstmImgCap()
     img_cap.fit(config, train_data, test_data, model_dir_path=model_dir_path)
