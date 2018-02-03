@@ -158,6 +158,22 @@ class Vgg16LstmImgCap(object):
 
         return history
 
+    def predict_image_caption(self, img_path):
+        img = img_to_array(load_img(img_path, target_size=(224, 224)))
+        img = np.expand_dims(img, axis=0)
+        img_feature = self.vgg16_model.predict(img)
+        input_seq = np.zeros(shape=(self.max_seq_length, self.vocab_size))
+        input_seq[self.max_seq_length-1, self.word2idx['START']] = 1
+        np.expand_dims(input_seq, axis=0)
+        wid_list = ['START']
+        while wid_list[len(wid_list)-1] != 'END':
+            output_tokens = self.model.predict([img_feature, input_seq])
+            output_idx = np.argmax(output_tokens[0, -1, :])
+            output_word = self.idx2word[output_idx]
+            wid_list.append(output_word)
+
+        return wid_list
+
 
 def main():
     img_cap = Vgg16LstmImgCap()
