@@ -5,13 +5,15 @@ def load_img_cap(img_dir_path, txt_dir_path):
     images = dict()
     texts = dict()
     for f in os.listdir(img_dir_path):
-        if os.path.isfile(f) and f.endswith('.png'):
+        filepath = os.path.join(img_dir_path, f)
+        if os.path.isfile(filepath) and f.endswith('.png'):
             name = f.replace('.png', '')
-            images[name] = os.path.join(img_dir_path, f)
+            images[name] = filepath
     for f in os.listdir(txt_dir_path):
-        if os.path.isfile(f) and f.endswith('.txt'):
+        filepath = os.path.join(txt_dir_path, f)
+        if os.path.isfile(filepath) and f.endswith('.txt'):
             name = f.replace('.txt', '')
-            texts[name] = open(os.path.join(txt_dir_path, f), 'rt').read()
+            texts[name] = open(filepath, 'rt').read()
 
     result = []
     for name, img_path in images.items():

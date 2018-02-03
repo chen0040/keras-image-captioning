@@ -45,7 +45,7 @@ class Vgg16LstmImgCap(object):
         return os.path.join(model_dir_path, Vgg16LstmImgCap.model_name + '-weights.h5')
 
     def create_model(self):
-        vgg16_input = Input(shape=(1000,))
+        vgg16_input = Input(shape=(1000, ))
         vgg16_feature_dense = Dense(units=5)(vgg16_input)
         vgg16_feature_repeat = RepeatVector(self.max_seq_length)(vgg16_feature_dense)
 
@@ -121,6 +121,10 @@ class Vgg16LstmImgCap(object):
         self.word2idx = self.config['word2idx']
         self.idx2word = self.config['idx2word']
         self.vgg16_model = VGG16(weights='imagenet', include_top=True)
+
+        print('vocab_size: ', self.vocab_size)
+        print('max_seq_length: ', self.max_seq_length)
+
         self.model = self.create_model()
 
         np.save(config_file_path, self.config)
