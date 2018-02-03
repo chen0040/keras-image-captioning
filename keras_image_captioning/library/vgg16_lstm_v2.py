@@ -175,6 +175,7 @@ class Vgg16LstmImgCapV2(object):
         img = img_to_array(load_img(img_path, target_size=(224, 224)))
         img = np.expand_dims(img, axis=0)
         img_feature = self.vgg16_model.predict(img).ravel()
+        img_feature = np.expand_dims(img_feature, axis=0)
         input_seq = np.zeros(shape=self.max_seq_length)
         input_seq[self.max_seq_length-1] = self.word2idx['START']
         input_seq = np.expand_dims(input_seq, axis=0)
