@@ -8,8 +8,8 @@ import os
 import nltk
 
 
-class Vgg16LstmImgEmbedCap(object):
-    model_name = "vgg16-lstm-embed"
+class Vgg16LstmImgCapV2(object):
+    model_name = "vgg16-lstm-v2"
 
     def __init__(self):
         self.model = None
@@ -21,8 +21,8 @@ class Vgg16LstmImgEmbedCap(object):
         self.idx2word = None
 
     def load_model(self, model_dir_path):
-        config_file_path = Vgg16LstmImgEmbedCap.get_config_file_path(model_dir_path)
-        weight_file_path = Vgg16LstmImgEmbedCap.get_weight_file_path(model_dir_path)
+        config_file_path = Vgg16LstmImgCapV2.get_config_file_path(model_dir_path)
+        weight_file_path = Vgg16LstmImgCapV2.get_weight_file_path(model_dir_path)
         self.config = np.load(config_file_path).item()
         self.max_seq_length = self.config['max_seq_length']
         self.vocab_size = self.config['vocab_size']
@@ -30,31 +30,33 @@ class Vgg16LstmImgEmbedCap(object):
         self.idx2word = self.config['idx2word']
         self.model = self.create_model()
         self.model.load_weights(weight_file_path)
-        self.vgg16_model = VGG16(weights='imagenet', include_top=True)
+        self.vgg16_model = VGG16(weights='imagenet', include_top=False)
 
     @staticmethod
     def get_config_file_path(model_dir_path):
-        return os.path.join(model_dir_path, Vgg16LstmImgEmbedCap.model_name + '-config.npy')
+        return os.path.join(model_dir_path, Vgg16LstmImgCapV2.model_name + '-config.npy')
 
     @staticmethod
     def get_architecture_file_path(model_dir_path):
-        return os.path.join(model_dir_path, Vgg16LstmImgEmbedCap.model_name + '-architecture.json')
+        return os.path.join(model_dir_path, Vgg16LstmImgCapV2.model_name + '-architecture.json')
 
     @staticmethod
     def get_weight_file_path(model_dir_path):
-        return os.path.join(model_dir_path, Vgg16LstmImgEmbedCap.model_name + '-weights.h5')
+        return os.path.join(model_dir_path, Vgg16LstmImgCapV2.model_name + '-weights.h5')
 
     def create_model(self):
-        vgg16_input = Input(shape=(1000, ))
+        vgg16_input = Input(shape=(25088, ))
         vgg16_feature_dense = Dense(units=128)(vgg16_input)
         vgg16_feature_repeat = RepeatVector(self.max_seq_length)(vgg16_feature_dense)
 
-        language_input = Input(shape=self.max_seq_length)
+        language_input = Input(shape=(self.max_seq_length, ))
         language_input_embed = Embedding(
-            output_dim=100,
+            output_dim=200,
             input_dim=self.vocab_size,
             input_length=self.max_seq_length)(language_input)
         language_model = LSTM(units=128, return_sequences=True)(language_input_embed)
+        language_model = LSTM(units=128, return_sequences=True)(language_model)
+        language_model = TimeDistributed(Dense(128, activation='relu'))(language_model)
 
         decoder = concatenate([vgg16_feature_repeat, language_model])
 
@@ -87,7 +89,8 @@ class Vgg16LstmImgEmbedCap(object):
             print(txt)
             img = img_to_array(load_img(img_path, target_size=(224, 224)))
             img = np.expand_dims(img, axis=0)
-            img_feature = self.vgg16_model.predict(img)[0]
+            img_feature = self.vgg16_model.predict(img).ravel()
+
             txt = 'START ' + txt.lower() + ' END'
 
             words = nltk.word_tokenize(txt)
@@ -124,16 +127,16 @@ class Vgg16LstmImgEmbedCap(object):
         if epochs is None:
             epochs = 10
 
-        config_file_path = Vgg16LstmImgEmbedCap.get_config_file_path(model_dir_path)
-        weight_file_path = Vgg16LstmImgEmbedCap.get_weight_file_path(model_dir_path)
-        architecture_file_path = Vgg16LstmImgEmbedCap.get_architecture_file_path(model_dir_path)
+        config_file_path = Vgg16LstmImgCapV2.get_config_file_path(model_dir_path)
+        weight_file_path = Vgg16LstmImgCapV2.get_weight_file_path(model_dir_path)
+        architecture_file_path = Vgg16LstmImgCapV2.get_architecture_file_path(model_dir_path)
 
         self.config = config
         self.max_seq_length = self.config['max_seq_length']
         self.vocab_size = self.config['vocab_size']
         self.word2idx = self.config['word2idx']
         self.idx2word = self.config['idx2word']
-        self.vgg16_model = VGG16(weights='imagenet', include_top=True)
+        self.vgg16_model = VGG16(weights='imagenet', include_top=False)
 
         print('vocab_size: ', self.vocab_size)
         print('max_seq_length: ', self.max_seq_length)
