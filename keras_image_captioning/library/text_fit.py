@@ -20,7 +20,7 @@ def fit_text(data, max_vocab_size, max_allowed_seq_length=None):
 
     word2idx = dict()
     for idx, word in enumerate(counter.most_common(max_vocab_size)):
-        word2idx[word] = idx
+        word2idx[word[0]] = idx
 
     config = dict()
     config['max_seq_length'] = max_seq_length
