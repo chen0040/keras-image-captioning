@@ -50,29 +50,32 @@ The [sample codes](keras_image_captioning/demo/vgg16_lstm_predict.py) below show
  for the pokemon image in the [demo/data/pokemon/img](keras_image_captioning/demo/data/pokemon/img):
  
 ```python
+from keras_image_captioning.library.img_cap_loader import load_img_cap
 from keras_image_captioning.library.vgg16_lstm import Vgg16LstmImgCap
 import numpy as np
-import os
+from random import shuffle
 
 
 def main():
     seed = 42
 
     np.random.seed(seed)
-    img_dir_path = './data/pokemon/img'
-    model_dir_path = './models/pokemon'
 
-    image_paths = []
-    for f in os.listdir(img_dir_path):
-        filepath = os.path.join(img_dir_path, f)
-        if os.path.isfile(filepath) and f.endswith('.png'):
-            image_paths.append(filepath)
+    img_dir_path = './data/pokemon/img'
+    txt_dir_path = './data/pokemon/txt'
+    model_dir_path = './models/pokemon'
+    data = load_img_cap(img_dir_path, txt_dir_path)
+
+    shuffle(data)
 
     img_cap = Vgg16LstmImgCap()
     img_cap.load_model(model_dir_path)
 
-    for img_path in image_paths[:20]:
-        print(img_cap.predict_image_caption(img_path))
+    for img_path, actual_caption in data[:20]:
+        predicted_caption = img_cap.predict_image_caption(img_path)
+        actual_caption = actual_caption.lower()
+        print('Origin: ', actual_caption)
+        print('Predict: ', predicted_caption, '...')
 
 
 if __name__ == '__main__':
