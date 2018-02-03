@@ -20,7 +20,7 @@ def main():
     config = fit_text(data, max_vocab_size=max_vocab_size, max_allowed_seq_length=20)
 
     img_cap = Vgg16LstmImgCap()
-    epochs = 30
+    epochs = 100
     img_cap.fit(config, train_data, test_data, model_dir_path=model_dir_path, epochs=epochs)
 
 

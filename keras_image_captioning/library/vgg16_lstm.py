@@ -110,7 +110,7 @@ class Vgg16LstmImgCap(object):
                 targets.append(output_seq)
                 img_features.append(img_feature)
 
-        print('done')
+        print('samples encoded: ', len(img_features))
 
         return np.array(img_features), np.array(txt_inputs), np.array(targets)
 
