@@ -184,3 +184,10 @@ class Vgg16LstmImgCap(object):
 
         return ' '.join(wid_list).replace('START', '').replace('END', '').strip()
 
+
+def main():
+    img_cap = Vgg16LstmImgCap()
+
+
+if __name__ == '__main__':
+    main()

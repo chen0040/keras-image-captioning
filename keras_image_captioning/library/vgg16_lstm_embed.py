@@ -8,8 +8,8 @@ import os
 import nltk
 
 
-class Vgg16LstmImgCap(object):
-    model_name = "vgg16-lstm"
+class Vgg16LstmImgEmbedCap(object):
+    model_name = "vgg16-lstm-embed"
 
     def __init__(self):
         self.model = None
@@ -21,8 +21,8 @@ class Vgg16LstmImgCap(object):
         self.idx2word = None
 
     def load_model(self, model_dir_path):
-        config_file_path = Vgg16LstmImgCap.get_config_file_path(model_dir_path)
-        weight_file_path = Vgg16LstmImgCap.get_weight_file_path(model_dir_path)
+        config_file_path = Vgg16LstmImgEmbedCap.get_config_file_path(model_dir_path)
+        weight_file_path = Vgg16LstmImgEmbedCap.get_weight_file_path(model_dir_path)
         self.config = np.load(config_file_path).item()
         self.max_seq_length = self.config['max_seq_length']
         self.vocab_size = self.config['vocab_size']
@@ -34,23 +34,27 @@ class Vgg16LstmImgCap(object):
 
     @staticmethod
     def get_config_file_path(model_dir_path):
-        return os.path.join(model_dir_path, Vgg16LstmImgCap.model_name + '-config.npy')
+        return os.path.join(model_dir_path, Vgg16LstmImgEmbedCap.model_name + '-config.npy')
 
     @staticmethod
     def get_architecture_file_path(model_dir_path):
-        return os.path.join(model_dir_path, Vgg16LstmImgCap.model_name + '-architecture.json')
+        return os.path.join(model_dir_path, Vgg16LstmImgEmbedCap.model_name + '-architecture.json')
 
     @staticmethod
     def get_weight_file_path(model_dir_path):
-        return os.path.join(model_dir_path, Vgg16LstmImgCap.model_name + '-weights.h5')
+        return os.path.join(model_dir_path, Vgg16LstmImgEmbedCap.model_name + '-weights.h5')
 
     def create_model(self):
         vgg16_input = Input(shape=(1000, ))
         vgg16_feature_dense = Dense(units=128)(vgg16_input)
         vgg16_feature_repeat = RepeatVector(self.max_seq_length)(vgg16_feature_dense)
 
-        language_input = Input(shape=(self.max_seq_length, self.vocab_size))
-        language_model = LSTM(units=128, return_sequences=True)(language_input)
+        language_input = Input(shape=self.max_seq_length)
+        language_input_embed = Embedding(
+            output_dim=100,
+            input_dim=self.vocab_size,
+            input_length=self.max_seq_length)(language_input)
+        language_model = LSTM(units=128, return_sequences=True)(language_input_embed)
 
         decoder = concatenate([vgg16_feature_repeat, language_model])
 
@@ -95,7 +99,7 @@ class Vgg16LstmImgCap(object):
             print(words)
 
             for i in range(1, len(words)):
-                input_seq = np.zeros(shape=(self.max_seq_length, self.vocab_size))
+                input_seq = np.zeros(shape=self.max_seq_length)
                 output_seq = np.zeros(shape=self.vocab_size)
 
                 if words[i] in self.word2idx:
@@ -104,7 +108,7 @@ class Vgg16LstmImgCap(object):
                 for j in range(0, i):
                     if words[j] in self.word2idx:
                         k = self.max_seq_length - i + j
-                        input_seq[k, self.word2idx[words[j]]] = 1
+                        input_seq[k] = self.word2idx[words[j]]
 
                 txt_inputs.append(input_seq)
                 targets.append(output_seq)
@@ -120,9 +124,9 @@ class Vgg16LstmImgCap(object):
         if epochs is None:
             epochs = 10
 
-        config_file_path = Vgg16LstmImgCap.get_config_file_path(model_dir_path)
-        weight_file_path = Vgg16LstmImgCap.get_weight_file_path(model_dir_path)
-        architecture_file_path = Vgg16LstmImgCap.get_architecture_file_path(model_dir_path)
+        config_file_path = Vgg16LstmImgEmbedCap.get_config_file_path(model_dir_path)
+        weight_file_path = Vgg16LstmImgEmbedCap.get_weight_file_path(model_dir_path)
+        architecture_file_path = Vgg16LstmImgEmbedCap.get_architecture_file_path(model_dir_path)
 
         self.config = config
         self.max_seq_length = self.config['max_seq_length']
@@ -163,8 +167,8 @@ class Vgg16LstmImgCap(object):
         img = img_to_array(load_img(img_path, target_size=(224, 224)))
         img = np.expand_dims(img, axis=0)
         img_feature = self.vgg16_model.predict(img)
-        input_seq = np.zeros(shape=(self.max_seq_length, self.vocab_size))
-        input_seq[self.max_seq_length-1, self.word2idx['START']] = 1
+        input_seq = np.zeros(shape=self.max_seq_length)
+        input_seq[self.max_seq_length-1] = self.word2idx['START']
         input_seq = np.expand_dims(input_seq, axis=0)
         wid_list = ['START']
         while wid_list[len(wid_list)-1] != 'END':
@@ -176,10 +180,10 @@ class Vgg16LstmImgCap(object):
             if len(wid_list) > self.max_seq_length:
                 break
 
-            input_seq = np.zeros(shape=(self.max_seq_length, self.vocab_size))
+            input_seq = np.zeros(shape=self.max_seq_length)
             for j in range(0, len(wid_list)):
                 k = self.max_seq_length - len(wid_list) + j
-                input_seq[k, self.word2idx[wid_list[j]]] = 1
+                input_seq[k] = self.word2idx[wid_list[j]]
             input_seq = np.expand_dims(input_seq, axis=0)
 
         return ' '.join(wid_list).replace('START', '').replace('END', '').strip()
