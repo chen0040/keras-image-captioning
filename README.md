@@ -16,8 +16,8 @@ So far with vgg16_top_included=True gives the best performance
 
 ### Vgg16LstmImgCap
 
-The [sample codes](keras_image_captioning/demo/vgg16_lstm_train.py) below shows how to train the pokemon image 
-captioning using image and text data in the [demo/data/pokemon](keras_image_captioning/demo/data/pokemon):
+The [sample codes](demo/vgg16_lstm_train.py) below shows how to train the pokemon image 
+captioning using image and text data in the [demo/data/pokemon](demo/data/pokemon):
 
 ```python
 from keras_image_captioning.library.img_cap_loader import load_img_cap
@@ -51,8 +51,8 @@ if __name__ == '__main__':
 
 ```
 
-The [sample codes](keras_image_captioning/demo/vgg16_lstm_predict.py) below shows how to predict the captioning
- for the pokemon image in the [demo/data/pokemon/img](keras_image_captioning/demo/data/pokemon/img):
+The [sample codes](demo/vgg16_lstm_predict.py) below shows how to predict the captioning
+ for the pokemon image in the [demo/data/pokemon/img](demo/data/pokemon/img):
  
 ```python
 from keras_image_captioning.library.img_cap_loader import load_img_cap
@@ -90,8 +90,8 @@ if __name__ == '__main__':
 
 ### Vgg16LstmImgCapV2
 
-The [sample codes](keras_image_captioning/demo/vgg16_lstm_v2_train.py) below shows how to train the pokemon image 
-captioning using image and text data in the [demo/data/pokemon](keras_image_captioning/demo/data/pokemon):
+The [sample codes](demo/vgg16_lstm_v2_train.py) below shows how to train the pokemon image 
+captioning using image and text data in the [demo/data/pokemon](demo/data/pokemon):
 
 ```python
 from keras_image_captioning.library.img_cap_loader import load_img_cap
@@ -125,8 +125,8 @@ if __name__ == '__main__':
 
 ```
 
-The [sample codes](keras_image_captioning/demo/vgg16_lstm_v2_predict.py) below shows how to predict the captioning
- for the pokemon image in the [demo/data/pokemon/img](keras_image_captioning/demo/data/pokemon/img):
+The [sample codes](demo/vgg16_lstm_v2_predict.py) below shows how to predict the captioning
+ for the pokemon image in the [demo/data/pokemon/img](demo/data/pokemon/img):
  
 ```python
 from keras_image_captioning.library.img_cap_loader import load_img_cap
