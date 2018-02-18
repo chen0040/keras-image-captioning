@@ -17,11 +17,12 @@ def main():
 
     train_data, test_data = train_test_split(data, test_size=0.2, random_state=seed)
 
-    config = fit_text(data, max_vocab_size=max_vocab_size, max_allowed_seq_length=20)
+    text_data = [txt for _, txt in data]
+    text_data_model = fit_text(text_data, max_vocab_size=max_vocab_size, max_allowed_seq_length=20)
 
     img_cap = Vgg16LstmImgCap()
     epochs = 100
-    img_cap.fit(config, train_data, test_data, model_dir_path=model_dir_path, epochs=epochs)
+    img_cap.fit(text_data_model, train_data, test_data, model_dir_path=model_dir_path, epochs=epochs)
 
 
 if __name__ == '__main__':

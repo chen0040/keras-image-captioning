@@ -114,7 +114,7 @@ class Vgg16LstmImgCap(object):
 
         return np.array(img_features), np.array(txt_inputs), np.array(targets)
 
-    def fit(self, config, train_data, test_data, model_dir_path, batch_size=None, epochs=None):
+    def fit(self, text_data_model, train_data, test_data, model_dir_path, batch_size=None, epochs=None):
         if batch_size is None:
             batch_size = 16
         if epochs is None:
@@ -124,7 +124,7 @@ class Vgg16LstmImgCap(object):
         weight_file_path = Vgg16LstmImgCap.get_weight_file_path(model_dir_path)
         architecture_file_path = Vgg16LstmImgCap.get_architecture_file_path(model_dir_path)
 
-        self.config = config
+        self.config = text_data_model
         self.max_seq_length = self.config['max_seq_length']
         self.vocab_size = self.config['vocab_size']
         self.word2idx = self.config['word2idx']

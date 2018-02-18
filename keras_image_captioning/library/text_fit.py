@@ -5,8 +5,7 @@ import nltk
 def fit_text(data, max_vocab_size, max_allowed_seq_length=None):
     counter = Counter()
     max_seq_length = 0
-    for t in data:
-        _, txt = t
+    for txt in data:
         txt = 'START ' + txt.lower() + ' END'
         words = nltk.word_tokenize(txt)
         words = [word for word in words if word.isalnum()]
